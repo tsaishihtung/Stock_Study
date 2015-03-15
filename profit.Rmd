@@ -1,0 +1,101 @@
+---
+title: "Stock_Study"
+output: 
+  html_document:
+    keep_md: true
+---
+
+##Profit vs. big report (201503)
+This report is to analyze the relationship between the stock profit vs.its proportion of
+shareholder whose number of stock is larger than 400 (big).
+
+
+```{r setoptions,echo=FALSE,message=FALSE}
+library(knitr)
+library(dplyr)
+opts_chunk$set(echo=TRUE)
+```
+
+```{r data}
+df<-read.csv(file="D:/Stock_Study/P2.csv")
+good<-complete.cases(df)
+df<-df[good,]
+dfs<-filter(df,big<9 & big>-10 & p>20 & profit<1)
+```
+#Profit vs big plot.
+Based on profit and big, we separate nine regions of the stocks.
+```{r profitbig,fig.height=8,fig.width=8}
+with(dfs,plot(big,profit,col="blue"))
+text(5,0.5,"(1)")
+text(5,0.3,"(2)")
+text(5,0.1,"(3)")
+text(3,0.5,"(4)")
+text(3,0.3,"(5)")
+text(3,0.1,"(6)")
+text(1,0.5,"(7)")
+text(1,0.3,"(8)")
+text(1,0.1,"(9)")
+abline(v=0,h=0.0)
+abline(v=2,h=0.2)
+abline(v=4,h=0.4)
+```
+
+#Probability of each profit-big region .
+In this table, we calculate the proportion of each stock region.
+```{r summary}
+dfs1<-dfs%>%filter(big>4 & profit>0.4)%>%arrange(desc(profit))%>%mutate(type="(1)",big_region=">4",profit_region=">40%")
+dfs2<-dfs%>%filter(big>4 & profit>0.2 & profit<0.4)%>%arrange(desc(profit))%>%mutate(type="(2)",big_region=">4",profit_region="20~40%")
+dfs3<-dfs%>%filter(big>4 & profit>0 & profit<0.2)%>%arrange(desc(profit))%>%mutate(type="(3)",big_region=">4",profit_region="0~20%")
+dfs4<-dfs%>%filter(big>2 & big<4 & profit>0.4)%>%arrange(desc(profit))%>%mutate(type="(4)",big_region="2~4",profit_region=">40%")
+dfs5<-dfs%>%filter(big>2 & big<4 & profit>0.2 & profit<0.4)%>%arrange(desc(profit))%>%mutate(type="(5)",big_region="2~4",profit_region="20~40%")
+dfs6<-dfs%>%filter(big>2 & big<4 & profit>0 & profit<0.2)%>%arrange(desc(profit))%>%mutate(type="(6)",big_region="2~4",profit_region="0~20%")
+dfs7<-dfs%>%filter(big>0 & big<2 & profit>0.4)%>%arrange(desc(profit))%>%mutate(type="(7)",big_region="0~2",profit_region=">40%")
+dfs8<-dfs%>%filter(big>0 & big<2 & profit>0.2 & profit<0.4)%>%arrange(desc(profit))%>%mutate(type="(8)",big_region="0~2",profit_region="20~40%")
+dfs9<-dfs%>%filter(big>0 & big<2 & profit>0 & profit<0.2)%>%arrange(desc(profit))%>%mutate(type="(9)",big_region="0~2",profit_region="0~20%")
+dfss<-rbind(dfs1,dfs2,dfs3,dfs4,dfs5,dfs6,dfs7,dfs8,dfs9)
+dfss1<-group_by(dfss,type,big_region,profit_region)
+summarize(dfss1,num=length(type),prob=100*round(num/length(dfss1$type),3))
+ 
+time<-format(Sys.time())
+```
+
+#Display the stocks in region 1~9.
+
+Region 1 (big>4, profit>40%)
+```{r display_Region1}
+dfs1
+```
+Region 2 (big>4, profit=20~40%)
+```{r display_Region2}
+dfs2
+```
+Region 3 (big>4, profit=0~20%)
+```{r display_Region3}
+dfs3
+```
+Region 4 (big=2~4, profit>40%)
+```{r display_Region4}
+dfs4
+```
+Region 5 (big=2~4, profit=20~40%)
+```{r display_Region5}
+dfs5
+```
+Region 6 (big=2~4, profit=0~20%)
+```{r display_Region6}
+dfs6
+```
+Region 7 (big=0~2, profit>40%)
+```{r display_Region7}
+dfs7
+```
+Region 8 (big=0~2, profit=20~40%)
+```{r display_Region8}
+dfs8
+```
+Region 9 (big=0~2, profit=0~20%)
+```{r display_Region9}
+dfs9
+```
+
+Report time:`r time`
